@@ -31,12 +31,9 @@
 #include "packet/PacketExceptionIO.h"
 #include "io_hess.h"
 #include "EventIO.hh"
-#include <map>
+//#include <map>
 
 using namespace std;
-
-map< unsigned int, unsigned int > fTelescopeSimTelList;
-
 
 /// Writing the Packet
 int main(int argc, char *argv[])
@@ -67,42 +64,47 @@ int main(int argc, char *argv[])
             }
         }
 
-	static AllHessData* hsdata;
-	int nev = 0, ntrg = 0;
-	double wsum_all = 0.;
-	uint64_t item_type;   ///< Id type of the latest read item
-	int32_t itel, rc = 0;
-	int verbose = 0, ignore = 0, quiet = 0;
-	int showdata = 0, showhistory = 0;
+	//static AllHessData* hsdata;
+	hess_all_data_struct*     hsdata;
+	hsdata = NULL;
+	uint16_t nev = 0, ntrg = 0;
+	uint64_t item_type = 0;   /// ID of the last item
+	uint32_t itel = 0;
+	int32_t rc = 0;
+	uint16_t verbose = 0, ignore = 0, quiet = 0;
+	uint16_t showdata = 0;
 	size_t events = 0, max_events = 0;
-	int tel_id;
-	int ntel_trg = 0, min_tel_trg = 0;
+	uint32_t tel_id;
+	uint16_t ntel_trg = 0, min_tel_trg = 0;
+        int32_t _find_result; ///< Wether the file has more blocks to read
 
-	IO_ITEM_HEADER item_header;
+	// VF parameters
+	uint16_t NTel;
+
+	// Reading the input hessio file
 	eventio::EventIO iobuf;  //eventio::EventIO _input;
 	iobuf.OpenInput(argv[1]);
-	
+	hsdata = new AllHessData;
+
 
 	// from Maier/Konrad
 	/////////////////////////////////////////////
 	// Loop over all data in the input data file
 		for( ;; )
 		{
-			cout << "Find()" << iobuf.Find() << endl;
-			/* Find and read the next block of data. */
-			/* In case of problems with the data, just give up. */
-			if( iobuf.Find() != 0 )
-			{
-				break;
-			}
-			if( iobuf.Read() != 0 )
+			_find_result = iobuf.Find();
+			item_type = iobuf.ItemType();
+			cout << "item_type " << item_type << endl;
+			iobuf.Read();
+			
+			if( _find_result != 0 )
 			{
 				break;
 			}
 			
-			item_type = iobuf.ItemType();
-
-//////////////////////////////////////////
+			printf( "Found I/O block of type %ld\n", item_type );
+	
+			//////////////////////////////////////////
 			// check header types
 			switch( item_type )
 			{
@@ -114,277 +116,60 @@ int main(int argc, char *argv[])
 						printf( "%d of %d events triggered.\n", ntrg, nev );
 					}
 					nev = ntrg = 0;
-					wsum_all = 0.;
-					/* Structures might be allocated from previous run */
-					if( hsdata != NULL )
-					{
-						/* Free memory allocated inside ... */
-						for( itel = 0; itel < hsdata->run_header.ntel; itel++ )
-						{
-							if( hsdata->event.teldata[itel].raw != NULL )
-							{
-								free( hsdata->event.teldata[itel].raw );
-								hsdata->event.teldata[itel].raw = NULL;
-							}
-							if( hsdata->event.teldata[itel].pixtm != NULL )
-							{
-								free( hsdata->event.teldata[itel].pixtm );
-								hsdata->event.teldata[itel].pixtm = NULL;
-							}
-							if( hsdata->event.teldata[itel].img != NULL )
-							{
-								free( hsdata->event.teldata[itel].img );
-								hsdata->event.teldata[itel].img = NULL;
-							}
-						}
-						/* Free main structure */
-						free( hsdata );
-						hsdata = NULL;
-						
-						/* Perhaps some cleaning needed in ROOT as well ... */
-						
-					}
-					hsdata = ( AllHessData* ) calloc( 1, sizeof( AllHessData ) );
+					//hsdata = ( AllHessData* ) calloc( 1, sizeof( AllHessData ) );
 					if( ( rc = read_hess_runheader( iobuf.Buffer(), &hsdata->run_header ) ) < 0 )
 					{
 						cout << "Reading run header failed." << endl;
 						exit( 1 );
-					}
-					if( !quiet )
-					{
-						printf( "Reading simulated data for %d telescope(s)\n", hsdata->run_header.ntel );
-					}
-					if( verbose || rc != 0 )
-					{
-						printf( "read_hess_runheader(), rc = %d\n", rc );
 					}
 					if( showdata )
 					{
 						print_hess_runheader( iobuf.Buffer() );
 					}
 					
-					for( itel = 0; itel < hsdata->run_header.ntel; itel++ )
+					NTel = hsdata->run_header.ntel;
+					cout << "Number of telescopes: " << NTel << endl;
+					for( itel = 0; itel < NTel; itel++ )
 					{
-						tel_id = hsdata->run_header.tel_id[itel];
-						hsdata->camera_set[itel].tel_id = tel_id;
-						fTelescopeSimTelList[tel_id] = itel;
+						tel_id = hsdata->run_header.tel_id[itel]; // Telescope ID
+						// Assign tel_id to array of telescopes configuration structures
 						cout << "Telescope ID " << tel_id << " is telescope # " << itel << endl;
-						hsdata->camera_org[itel].tel_id = tel_id;
-						hsdata->pixel_set[itel].tel_id = tel_id;
-						hsdata->pixel_disabled[itel].tel_id = tel_id;
-						hsdata->cam_soft_set[itel].tel_id = tel_id;
-						hsdata->tracking_set[itel].tel_id = tel_id;
-						hsdata->point_cor[itel].tel_id = tel_id;
-						hsdata->event.num_tel = hsdata->run_header.ntel;
+						hsdata->camera_set[itel].tel_id = tel_id; // camera set
+						hsdata->camera_org[itel].tel_id = tel_id; // camera_org
+						hsdata->pixel_set[itel].tel_id = tel_id; // pixel_set
+						hsdata->pixel_disabled[itel].tel_id = tel_id; // pixel_disabled
+						hsdata->cam_soft_set[itel].tel_id = tel_id; //camera soft(ware?) set
+						hsdata->tracking_set[itel].tel_id = tel_id; // tracking set
+						hsdata->point_cor[itel].tel_id = tel_id; // pointing correction
+						
+						// event data set-up
+						hsdata->event.num_tel = NTel;
 						hsdata->event.teldata[itel].tel_id = tel_id;
 						hsdata->event.trackdata[itel].tel_id = tel_id;
-						if( ( hsdata->event.teldata[itel].raw =
-									( AdcData* ) calloc( 1, sizeof( AdcData ) ) ) == NULL )
-						{
-							cout << "Not enough memory" << endl;
-							exit( 1 );
-						}
-						hsdata->event.teldata[itel].raw->tel_id = tel_id;
-						if( ( hsdata->event.teldata[itel].pixtm =
-									( PixelTiming* ) calloc( 1, sizeof( PixelTiming ) ) ) == NULL )
-						{
-							cout << "Not enough memory" << endl;
-							exit( 1 );
-						}
-						hsdata->event.teldata[itel].pixtm->tel_id = tel_id;
-						if( ( hsdata->event.teldata[itel].img =
-									( ImgData* ) calloc( 2, sizeof( ImgData ) ) ) == NULL )
-						{
-							cout << "Not enough memory" << endl;
-							exit( 1 );
-						}
-						hsdata->event.teldata[itel].max_image_sets = 2;
-						hsdata->event.teldata[itel].img[0].tel_id = tel_id;
-						hsdata->event.teldata[itel].img[1].tel_id = tel_id;
-						hsdata->tel_moni[itel].tel_id = tel_id;
-						hsdata->tel_lascal[itel].tel_id = tel_id;
+
+                    				hsdata->event.teldata[itel].raw           = new AdcData;
+                    				hsdata->event.teldata[itel].raw->known    = 0;
+                    				hsdata->event.teldata[itel].raw->tel_id   = tel_id;
+                    				hsdata->event.teldata[itel].pixtm         = new PixelTiming;
+                    				hsdata->event.teldata[itel].pixtm->tel_id = tel_id;
+                    				hsdata->event.teldata[itel].img           = new ImgData[2];
+                    				hsdata->event.teldata[itel].max_image_sets = 2;
+                    				hsdata->event.teldata[itel].img[0].tel_id = tel_id;
+                    				hsdata->event.teldata[itel].img[1].tel_id = tel_id;
+                    				hsdata->tel_moni[itel].tel_id             = tel_id;
+                    				hsdata->tel_lascal[itel].tel_id           = tel_id;
+
+						cout << "DEBUG2" << endl;
 					}
 					break;
-				/* =================================================== */
 				case IO_TYPE_HESS_MCRUNHEADER:
-					rc = read_hess_mcrunheader( iobuf.Buffer(), &hsdata->mc_run_header );
-					
-					if( verbose || rc != 0 )
-					{
-						printf( "read_hess_mcrunheader(), rc = %d\n", rc );
-					}
-					//            if ( showdata )
-					print_hess_mcrunheader( iobuf.Buffer() );
-					break;
-					
-				/* =================================================== */
 				case IO_TYPE_MC_INPUTCFG:
-				{
-					struct linked_string corsika_inputs;
-					corsika_inputs.text = NULL;
-					corsika_inputs.next = NULL;
-					read_input_lines( iobuf.Buffer(), &corsika_inputs );
-					if( corsika_inputs.text != NULL )
-					{
-						struct linked_string* xl = NULL, *xln = NULL;
-						if( ! quiet )
-						{
-							printf( "\nCORSIKA was run with the following input lines:\n" );
-						}
-						for( xl = &corsika_inputs; xl != NULL; xl = xln )
-						{
-							if( ! quiet )
-							{
-								printf( "   %s\n", xl->text );
-							}
-							free( xl->text );
-							xl->text = NULL;
-							xln = xl->next;
-							xl->next = NULL;
-							if( xl != &corsika_inputs )
-							{
-								free( xl );
-							}
-						}
-					}
-				}
-				break;
-					
-				/* =================================================== */
-				case IO_TYPE_HESS_CAMSETTINGS:
-					tel_id = item_header.ident; // Telescope ID is in the header
-					if( ( itel = find_tel_idx( tel_id ) ) < 0 )
-					{
-						char msg[256];
-						snprintf( msg, sizeof( msg ) - 1,
-								  "Camera settings for unknown telescope %d.", tel_id );
-						cout << msg << endl;
-						exit( 1 );
-					}
-					rc = read_hess_camsettings( iobuf.Buffer(), &hsdata->camera_set[itel] );
-					if( verbose || rc != 0 )
-					{
-						printf( "read_hess_camsettings(), rc = %d\n", rc );
-					}
-					break;
-					
-				/* =================================================== */
 				case IO_TYPE_HESS_CAMORGAN:
-					tel_id = item_header.ident; // Telescope ID is in the header
-					if( ( itel = find_tel_idx( tel_id ) ) < 0 )
-					{
-						char msg[256];
-						snprintf( msg, sizeof( msg ) - 1,
-								  "Camera organisation for unknown telescope %d.", tel_id );
-						cout << msg << endl;
-						exit( 1 );
-					}
-					rc = read_hess_camorgan( iobuf.Buffer(), &hsdata->camera_org[itel] );
-					if( verbose || rc != 0 )
-					{
-						printf( "read_hess_camorgan(), rc = %d\n", rc );
-					}
-					if( showdata )
-					{
-						print_hess_camorgan( iobuf.Buffer() );
-					}
-					break;
-					
-				/* =================================================== */
 				case IO_TYPE_HESS_PIXELSET:
-					tel_id = item_header.ident; // Telescope ID is in the header
-					if( ( itel = find_tel_idx( tel_id ) ) < 0 )
-					{
-						char msg[256];
-						snprintf( msg, sizeof( msg ) - 1,
-								  "Pixel settings for unknown telescope %d.", tel_id );
-						cout << msg << endl;
-						exit( 1 );
-					}
-					rc = read_hess_pixelset( iobuf.Buffer(), &hsdata->pixel_set[itel] );
-					if( verbose || rc != 0 )
-					{
-						printf( "read_hess_pixelset(), rc = %d\n", rc );
-					}
-					if( showdata )
-					{
-						print_hess_pixelset( iobuf.Buffer() );
-					}
-					break;
-					
-				/* =================================================== */
 				case IO_TYPE_HESS_PIXELDISABLE:
-					tel_id = item_header.ident; // Telescope ID is in the header
-					if( ( itel = find_tel_idx( tel_id ) ) < 0 )
-					{
-						char msg[256];
-						snprintf( msg, sizeof( msg ) - 1,
-								  "Pixel disable block for unknown telescope %d.", tel_id );
-						cout << msg << endl;
-						exit( 1 );
-					}
-					rc = read_hess_pixeldis( iobuf.Buffer(), &hsdata->pixel_disabled[itel] );
-					if( verbose || rc != 0 )
-					{
-						printf( "read_hess_pixeldis(), rc = %d\n", rc );
-					}
-					break;
-					
-				/* =================================================== */
 				case IO_TYPE_HESS_CAMSOFTSET:
-					tel_id = item_header.ident; // Telescope ID is in the header
-					if( ( itel = find_tel_idx( tel_id ) ) < 0 )
-					{
-						char msg[256];
-						snprintf( msg, sizeof( msg ) - 1,
-								  "Camera software settings for unknown telescope %d.", tel_id );
-						cout << msg << endl;
-						exit( 1 );
-					}
-					rc = read_hess_camsoftset( iobuf.Buffer(), &hsdata->cam_soft_set[itel] );
-					if( verbose || rc != 0 )
-					{
-						printf( "read_hess_camsoftset(), rc = %d\n", rc );
-					}
-					break;
-					
-				/* =================================================== */
 				case IO_TYPE_HESS_POINTINGCOR:
-					tel_id = item_header.ident; // Telescope ID is in the header
-					if( ( itel = find_tel_idx( tel_id ) ) < 0 )
-					{
-						char msg[256];
-						snprintf( msg, sizeof( msg ) - 1,
-								  "Pointing correction for unknown telescope %d.", tel_id );
-						cout << msg << endl;
-						exit( 1 );
-					}
-					rc = read_hess_pointingcor( iobuf.Buffer(), &hsdata->point_cor[itel] );
-					if( verbose || rc != 0 )
-					{
-						printf( "read_hess_pointingco(), rc = %d\n", rc );
-					}
-					break;
-					
-				/* =================================================== */
 				case IO_TYPE_HESS_TRACKSET:
-					tel_id = item_header.ident; // Telescope ID is in the header
-					if( ( itel = find_tel_idx( tel_id ) ) < 0 )
-					{
-						char msg[256];
-						snprintf( msg, sizeof( msg ) - 1,
-								  "Tracking settings for unknown telescope %d.", tel_id );
-						cout << msg << endl;
-						exit( 1 );
-					}
-					rc = read_hess_trackset( iobuf.Buffer(), &hsdata->tracking_set[itel] );
-					if( verbose || rc != 0 )
-					{
-						printf( "read_hess_trackset(), rc = %d\n", rc );
-					}
-					break;
-					
-				/* =================================================== */
 				case IO_TYPE_HESS_EVENT:
 					rc = read_hess_event( iobuf.Buffer(), &hsdata->event, -1 );
 					if( verbose || rc != 0 )
@@ -484,51 +269,9 @@ int main(int argc, char *argv[])
 					}
 					break;
 					
-				/* =================================================== */
 				case IO_TYPE_HESS_TEL_MONI:
-					// Telescope ID among others in the header
-					tel_id = ( item_header.ident & 0xff ) |
-							 ( ( item_header.ident & 0x3f000000 ) >> 16 );
-					if( ( itel = find_tel_idx( tel_id ) ) < 0 )
-					{
-						char msg[256];
-						snprintf( msg, sizeof( msg ) - 1,
-								  "Telescope monitor block for unknown telescope %d.", tel_id );
-						cout << msg << endl;
-						exit( 1 );
-					}
-					rc = read_hess_tel_monitor( iobuf.Buffer(), &hsdata->tel_moni[itel] );
-					if( verbose || rc != 0 )
-					{
-						printf( "read_hess_tel_monitor(), rc = %d\n", rc );
-					}
-					if( showdata )
-					{
-						print_hess_tel_monitor( iobuf.Buffer() );
-					}
-					break;
-					
-				/* =================================================== */
 				case IO_TYPE_HESS_LASCAL:
-					tel_id = item_header.ident; // Telescope ID is in the header
-					if( ( itel = find_tel_idx( tel_id ) ) < 0 )
-					{
-						char msg[256];
-						snprintf( msg, sizeof( msg ) - 1,
-								  "Laser/LED calibration for unknown telescope %d.", tel_id );
-						cout << msg << endl;
-						exit( 1 );
-					}
-					rc = read_hess_laser_calib( iobuf.Buffer(), &hsdata->tel_lascal[itel] );
-					if( verbose || rc != 0 )
-					{
-						printf( "read_hess_laser_calib(), rc = %d\n", rc );
-					}
-					if( showdata )
-					{
-						print_hess_laser_calib( iobuf.Buffer() );
-					}
-					break;
+
 					
 				/* =================================================== */
 				case IO_TYPE_HESS_RUNSTAT:
@@ -564,8 +307,6 @@ int main(int argc, char *argv[])
 			//}
 		}
 		
-
-		reset_io_block( iobuf.Buffer() );
 		
 		if( nev > 0 )
 		{
@@ -581,6 +322,7 @@ int main(int argc, char *argv[])
 	// end while loop over all input files
 	////////////////////////////////////////////////////
 
+	iobuf.CloseInput();
 
      	    
         ///Number of events
