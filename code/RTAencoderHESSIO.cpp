@@ -22,11 +22,13 @@
 #include <config.h>
 #endif
 
+#define CTA_PROD1 1
+
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include<vector>
+#include <vector>
 #include "packet/PacketLibDefinition.h"
 #include "packet/PacketExceptionIO.h"
 #include "io_hess.h"
@@ -64,22 +66,22 @@ int main(int argc, char *argv[])
             }
         }
 
-	//static AllHessData* hsdata;
-	hess_all_data_struct*     hsdata;
+	AllHessData* hsdata;
+	//hess_all_data_struct*     hsdata;
 	hsdata = NULL;
-	uint16_t nev = 0, ntrg = 0;
-	uint64_t item_type = 0;   /// ID of the last item
-	uint32_t itel = 0;
-	int32_t rc = 0;
-	uint16_t verbose = 0, ignore = 0, quiet = 0;
-	uint16_t showdata = 0;
-	size_t events = 0, max_events = 0;
-	uint32_t tel_id;
-	uint16_t ntel_trg = 0, min_tel_trg = 0;
-        int32_t _find_result; ///< Wether the file has more blocks to read
+	PacketLib::word nev = 0, ntrg = 0;
+	long int item_type = 0;   /// ID of the last item
+	int itel = 0;
+	int rc = 0;
+	PacketLib::word verbose = 0, ignore = 0, quiet = 0;
+	PacketLib::word showdata = 0;
+	PacketLib::word events = 0, max_events = 0;
+	PacketLib::dword tel_id;
+	PacketLib::word ntel_trg = 0, min_tel_trg = 0;
+        PacketLib::dword _find_result; ///< Wether the file has more blocks to read
 
 	// VF parameters
-	uint16_t NTel;
+	PacketLib::word NTel;
 
 	// Reading the input hessio file
 	eventio::EventIO iobuf;  //eventio::EventIO _input;
@@ -96,7 +98,7 @@ int main(int argc, char *argv[])
 			item_type = iobuf.ItemType();
 			cout << "item_type " << item_type << endl;
 			iobuf.Read();
-			
+			int ret_code = 0;
 			if( _find_result != 0 )
 			{
 				break;
@@ -110,23 +112,17 @@ int main(int argc, char *argv[])
 			{
 				/* =================================================== */
 				case IO_TYPE_HESS_RUNHEADER:
-					/* Summary of a preceding run in the same file ? */
-					if( nev > 0 )
-					{
-						printf( "%d of %d events triggered.\n", ntrg, nev );
-					}
-					nev = ntrg = 0;
 					//hsdata = ( AllHessData* ) calloc( 1, sizeof( AllHessData ) );
-					if( ( rc = read_hess_runheader( iobuf.Buffer(), &hsdata->run_header ) ) < 0 )
+					
+					cout << "Activating IO_TYPE_HESS_RUNHEADER" << endl;			
+					rc = read_hess_runheader( iobuf.Buffer(), &hsdata->run_header);
+					cout << "rc: " << rc << endl;
+					if( rc < 0 )
 					{
 						cout << "Reading run header failed." << endl;
 						exit( 1 );
 					}
-					if( showdata )
-					{
-						print_hess_runheader( iobuf.Buffer() );
-					}
-					
+                
 					NTel = hsdata->run_header.ntel;
 					cout << "Number of telescopes: " << NTel << endl;
 					for( itel = 0; itel < NTel; itel++ )
@@ -181,14 +177,14 @@ int main(int argc, char *argv[])
 					{
 						print_hess_event( iobuf.Buffer() );
 					}
-					/* Count number of telescopes (still) present in data and triggered */
+					//Count number of telescopes (still) present in data and triggered 
 					ntel_trg = 0;
 					for( itel = 0; itel < hsdata->run_header.ntel; itel++ )
 						if( hsdata->event.teldata[itel].known )
 						{
-							/* If non-triggered telescopes record data (like HEGRA),
-							   we may have to check the central trigger bit as well,
-							   but ignore this for now. */
+							// If non-triggered telescopes record data (like HEGRA),
+							//   we may have to check the central trigger bit as well,
+							//   but ignore this for now. 
 							ntel_trg++;
 						}
 					if( hsdata->event.shower.known )
@@ -204,7 +200,6 @@ int main(int argc, char *argv[])
 					
 					break;
 					
-				/* =================================================== */
 				case IO_TYPE_HESS_CALIBEVENT:
 				{
 					int type = -1;
@@ -216,7 +211,6 @@ int main(int argc, char *argv[])
 				}
 				break;
 				
-				/* =================================================== */
 				case IO_TYPE_HESS_MC_SHOWER:
 					rc = read_hess_mc_shower( iobuf.Buffer(), &hsdata->mc_shower );
 					if( verbose || rc != 0 )
@@ -229,7 +223,6 @@ int main(int argc, char *argv[])
 					}
 					break;
 					
-				/* =================================================== */
 				case IO_TYPE_HESS_MC_EVENT:
 					rc = read_hess_mc_event( iobuf.Buffer(), &hsdata->mc_event );
 					if( verbose || rc != 0 )
@@ -244,7 +237,6 @@ int main(int argc, char *argv[])
 					
 					break;
 					
-				/* =================================================== */
 				case IO_TYPE_MC_TELARRAY:
 					if( hsdata && hsdata->run_header.ntel > 0 )
 					{
@@ -256,7 +248,6 @@ int main(int argc, char *argv[])
 					}
 					break;
 					
-				/* =================================================== */
 				case IO_TYPE_HESS_MC_PE_SUM:
 					rc = read_hess_mc_pe_sum( iobuf.Buffer(), &hsdata->mc_event.mc_pesum );
 					if( verbose || rc != 0 )
@@ -273,7 +264,6 @@ int main(int argc, char *argv[])
 				case IO_TYPE_HESS_LASCAL:
 
 					
-				/* =================================================== */
 				case IO_TYPE_HESS_RUNSTAT:
 					rc = read_hess_run_stat( iobuf.Buffer(), &hsdata->run_stat );
 					if( verbose || rc != 0 )
@@ -286,7 +276,6 @@ int main(int argc, char *argv[])
 					}
 					break;
 					
-				/* =================================================== */
 				case IO_TYPE_HESS_MC_RUNSTAT:
 					rc = read_hess_mc_run_stat( iobuf.Buffer(), &hsdata->mc_run_stat );
 					if( verbose || rc != 0 )
@@ -322,7 +311,7 @@ int main(int argc, char *argv[])
 	// end while loop over all input files
 	////////////////////////////////////////////////////
 
-	iobuf.CloseInput();
+	//iobuf.CloseInput();
 
      	    
         ///Number of events

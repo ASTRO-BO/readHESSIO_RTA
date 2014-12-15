@@ -20,7 +20,7 @@
 SHELL = /bin/sh
 
 ####### 1) Project names and system
-LINKERENV= root, cfitsio
+LINKERENV= cfitsio
 
 #SYSTEM: linux or QNX
 SYSTEM= $(shell gcc -dumpmachine)
@@ -67,11 +67,11 @@ ICON_DIR = ui
 
 CXX ?= g++
 #Insert the optional parameter to the compiler. The CFLAGS could be changed externally by the user
-CFLAGS ?= -O2
+CFLAGS ?= -g -O0
 #Set INCPATH to add the inclusion paths
 INCPATH = -I ./include  -I $(CTARTA)/include -I$(CTARTA)/include/packet -L$(CTARTA)/lib -I$(HESSIOSYS)/include
 #Insert the implicit parameter to the compiler:
-ALL_CFLAGS = -fexceptions -Wall $(INCPATH) $(CFLAGS)
+ALL_CFLAGS = -g -fexceptions -Wall $(INCPATH) $(CFLAGS)
 ifeq ($(SYSTEM), QNX)
 	ALL_CFLAGS += -Vgcc_ntox86_gpp -lang-c++
 endif
