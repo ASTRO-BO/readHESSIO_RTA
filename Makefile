@@ -24,9 +24,9 @@ LINKERENV= cfitsio
 
 #SYSTEM: linux or QNX
 SYSTEM= $(shell gcc -dumpmachine)
-PROJECT= RTAtelemDemo
+PROJECT= readHESSIO_RTA
 EXE_NAME1 = RTAencoderHESSIO
-LIB_NAME = 
+LIB_NAME = libCreateConfig
 VER_FILE_NAME = version.h
 #the name of the directory where the conf file are copied (into $(datadir))
 CONF_DEST_DIR =
@@ -36,7 +36,7 @@ ICON_NAME=
 ####### 2) Directories for the installation
 
 # Prefix for each installed program. Only ABSOLUTE PATH
-prefix=/usr/local
+prefix=$(LOCAL)
 exec_prefix=$(prefix)
 # The directory to install the binary files in.
 bindir=$(exec_prefix)/bin
@@ -69,7 +69,7 @@ CXX ?= g++
 #Insert the optional parameter to the compiler. The CFLAGS could be changed externally by the user
 CFLAGS ?= -g -O0
 #Set INCPATH to add the inclusion paths
-INCPATH = -I ./include  -I $(CTARTA)/include -I$(CTARTA)/include/packet -L$(CTARTA)/lib -I$(HESSIOSYS)/include
+INCPATH = -I $(INCLUDE_DIR)  -I $(CTARTA)/include -I$(CTARTA)/include/packet -L$(CTARTA)/lib -I$(HESSIOSYS)/include
 #Insert the implicit parameter to the compiler:
 ALL_CFLAGS = -g -fexceptions -Wall $(INCPATH) $(CFLAGS)
 ifeq ($(SYSTEM), QNX)
@@ -168,20 +168,16 @@ all: exe
 
 lib: staticlib 
 
-exe: $(EXE_NAME1)
-
-$(EXE_NAME1): $(OBJECTS)
-	test -d $(EXE_DESTDIR) || mkdir -p $(EXE_DESTDIR)
-	$(CXX) $(CPPFLAGS) $(ALL_CFLAGS) -o $(EXE_DESTDIR)/$(EXE_NAME1) $(OBJECTS_DIR)/$(EXE_NAME1).o $(LIBS)
-
-
-staticlib: $(OBJECTS)
+exe: makeobjdir $(OBJECTS)
+		test -d $(EXE_DESTDIR) || mkdir -p $(EXE_DESTDIR)
+		$(CXX) $(CPPFLAGS) $(ALL_CFLAGS) -o $(EXE_DESTDIR)/$(EXE_NAME1) $(OBJECTS_DIR)/*.o $(LIBS)
+	
+staticlib: makelibdir makeobjdir $(OBJECTS)	
 		test -d $(LIB_DESTDIR) || mkdir -p $(LIB_DESTDIR)	
 		$(DEL_FILE) $(LIB_DESTDIR)/$(TARGETA) 	
 		$(AR) $(LIB_DESTDIR)/$(TARGETA) $(OBJECTS_DIR)/*.o
 	
-dynamiclib: $(OBJECTS)
-		test -d $(LIB_DESTDIR) || mkdir -p $(LIB_DESTDIR)
+dynamiclib: makelibdir makeobjdir $(OBJECTS)	
 		$(DEL_FILE) $(TARGET) $(TARGET0) $(TARGET1) $(TARGET2)
 		$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS_DIR)/*.o $(LIBS)
 		$(SYMLINK) $(TARGET) $(TARGET0)
