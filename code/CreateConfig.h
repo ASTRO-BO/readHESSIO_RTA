@@ -17,59 +17,58 @@
 #ifndef _CREATECONFIG_H
 #define _CREATECONFIG_H
 
-#include <rtautils/OutputFileFITS.h>
+#include <ctautils/OutputFileFITS.h>
 #include <iostream>
 #include <stdlib.h>
 
-using namespace std;
 
 class CreateConfig {
         
     private:
-        qlbase::OutputFileFITS conf_file;
+        CTAUtils::OutputFileFITS conf_file;
         
         
     public:
         /// It writes the CTA configuration file in FITS format
         /// \param confInputFileName The input file name of the CTA configuration file
-        CreateConfig(const string& confInputFileName);
+        CreateConfig(const std::string& confInputFileName);
 
         void writeConfig_L0( int conf_Nrows_L0,
-			vector<int64_t> vecL0ID,
-        		vector<int16_t> vecTelID,
-        		vector<int64_t> vecTelType,
-        		vector<float> vecTelX,
-        		vector<float> vecTelY,
-        		vector<float> vecTelZ,
-        		vector<float> vecFL,
-        		vector<float> vecFOV,
-        		vector<float> vecCameraScaleFactor,
-        		vector<float> vecCameraCentreOffset,
-        		vector<float> vecCameraRotation,
-        		vector<int16_t> vecNPixel,
-        		vector<int16_t> vecNPixel_active,
-        		vector<int16_t> vecNSamples,
-        		vector<float> vecSample_time_slice,
-        		vector<int16_t> vecNGains,
-        		vector<float> vecHiLoScale,
-        		vector<int16_t> vecHiLoThreshold,
-        		vector<float> vecHiLoOffset,
-        		vector<int16_t> vecNTubesOFF,
-        		vector<int16_t> vecNMirrors,
-        		vector<float> vecMirrorArea);
+			std::vector<int64_t> vecL0ID,
+        		std::vector<int16_t> vecTelID,
+        		std::vector<int64_t> vecTelType,
+        		std::vector<float> vecTelX,
+        		std::vector<float> vecTelY,
+        		std::vector<float> vecTelZ,
+        		std::vector<float> vecFL,
+        		std::vector<float> vecFOV,
+        		std::vector<float> vecCameraScaleFactor,
+        		std::vector<float> vecCameraCentreOffset,
+        		std::vector<float> vecCameraRotation,
+        		std::vector<int16_t> vecNPixel,
+        		std::vector<int16_t> vecNPixel_active,
+        		std::vector<int16_t> vecNSamples,
+        		std::vector<float> vecSample_time_slice,
+        		std::vector<int16_t> vecNGains,
+        		std::vector<float> vecHiLoScale,
+        		std::vector<int16_t> vecHiLoThreshold,
+        		std::vector<float> vecHiLoOffset,
+        		std::vector<int16_t> vecNTubesOFF,
+        		std::vector<int16_t> vecNMirrors,
+        		std::vector<float> vecMirrorArea);
         
 	void writeConfig_L1( int conf_Nrows_L1,
-			vector<int64_t> vecL1ID,
-        		vector<int64_t> vecL0ID_L1,
-        		vector<int16_t> vecPixelID,
-        		vector<float> vecXTubeMM,
-        		vector<float> vecYTubeMM,
-        		vector<float> vecRTubeMM,
-        		vector<float> vecXTubeDeg,
-        		vector<float> vecYTubeDeg,
-        		vector<float> vecRTubeDeg,
-        		vector<float> vecAreaTube_m2,
-        		vector<int16_t> vecTubeOFF);
+			std::vector<int64_t> vecL1ID,
+        		std::vector<int64_t> vecL0ID_L1,
+        		std::vector<int16_t> vecPixelID,
+        		std::vector<float> vecXTubeMM,
+        		std::vector<float> vecYTubeMM,
+        		std::vector<float> vecRTubeMM,
+        		std::vector<float> vecXTubeDeg,
+        		std::vector<float> vecYTubeDeg,
+        		std::vector<float> vecRTubeDeg,
+        		std::vector<float> vecAreaTube_m2,
+        		std::vector<int16_t> vecTubeOFF);
         
         ~CreateConfig();
 

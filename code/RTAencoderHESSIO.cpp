@@ -34,12 +34,12 @@
 #include <math.h>
 
 #include <time.h>
-#include <math.h>
 #include <vector>
-#include "packet/PacketLibDefinition.h"
-#include "packet/PacketExceptionIO.h"
-#include "io_hess.h"
-#include "EventIO.hh"
+#include <packet/PacketLibDefinition.h>
+#include <packet/PacketExceptionIO.h>
+
+#include <io_hess.h>
+#include <EventIO.hh>
 
 #include <CreateConfig.h>
 
@@ -72,52 +72,6 @@ int FillTelConfig( AllHessData* hsdata , const string& fits_filename){
 	cout << " m^2 are of parabolic type" << endl;
 	cout << " assume that all telescopes with " << fSC_number_of_mirrors;
 	cout << " mirrors are Schwarzschild-Couder telescopes" << endl;
-	
-	// define tree
-/*
-	int fTelID = 0;
-	unsigned int fNTel = 0;
-	float fTelxpos = 0.;
-	float fTelypos = 0.;
-	float fTelzpos = 0.;
-	float fFocalLength = 0.;
-	float fCameraScaleFactor = 1.;
-	float fCameraCentreOffset = 0.;
-	float fCameraRotation = 0.;
-	unsigned int nPixel = 0;
-	unsigned int nPixel_active = 0;
-	unsigned int nSamples = 0;
-	float Sample_time_slice = 0.;
-	unsigned int nGains;
-	float fHiLoScale = 0.;
-	int   fHiLoThreshold = 0;
-	float fHiLoOffset = 0.;
-	const unsigned int fMaxPixel = 50000;
-	float fXTubeMM[fMaxPixel];
-	float fYTubeMM[fMaxPixel];
-	float fRTubeMM[fMaxPixel];
-	float fXTubeDeg[fMaxPixel];
-	float fYTubeDeg[fMaxPixel];
-	float fRTubeDeg[fMaxPixel];
-	float fATubem2[fMaxPixel];
-	int nDisabled = 0;
-	int fTubeDisabled[fMaxPixel];
-	float fMirrorArea = 0.;
-	int fNMirrors = 0;
-	float fFOV = 0.;
-	unsigned long fTelescope_type = 0;
-	for( unsigned int i = 0; i < fMaxPixel; i++ )
-	{
-		fXTubeMM[i] = 0.;
-		fYTubeMM[i] = 0.;
-		fRTubeMM[i] = 0.;
-		fXTubeDeg[i] = 0.;
-		fYTubeDeg[i] = 0.;
-		fRTubeDeg[i] = 0.;
-		fTubeDisabled[i] = 0;
-		fATubem2[i] = 0.;
-	}
-*/
 
 	int16_t check_NTel = 0;
         vector<int64_t> vecL0ID;
@@ -136,7 +90,6 @@ int FillTelConfig( AllHessData* hsdata , const string& fits_filename){
         vector<float> vecCameraRotation;
 	int16_t NPixel;
         vector<int16_t> vecNPixel;
-	int16_t NPixel_active = 0;
         vector<int16_t> vecNPixel_active;
         vector<int16_t> vecNSamples;
         vector<float> vecSample_time_slice;
@@ -154,7 +107,6 @@ int FillTelConfig( AllHessData* hsdata , const string& fits_filename){
 	int64_t counterL1IDrow = 0;
 	int64_t L1ID = 0;
         vector<int64_t> vecL1ID;
-	int64_t L0ID_L1 = 0;
         vector<int64_t> vecL0ID_L1;
         vector<int16_t> vecPixelID;
         vector<float> vecXTubeMM;
@@ -174,6 +126,8 @@ int FillTelConfig( AllHessData* hsdata , const string& fits_filename){
 	// fill the parameters
 	for( int itel = 0; itel <  NTel; itel++ )
 	{
+		int16_t NPixel_active = 0;
+
 
 		check_NTel++;
 		if (check_NTel > NTel){
@@ -182,9 +136,6 @@ int FillTelConfig( AllHessData* hsdata , const string& fits_filename){
 
 		// Level 0 ID
 		vecL0ID.push_back(itel);
-
-		// Level 1 ID
-		vecL1ID.push_back(L1ID++);
 
 		// Telescope ID
 		vecTelID.push_back(hsdata->run_header.tel_id[itel]);
@@ -259,8 +210,14 @@ int FillTelConfig( AllHessData* hsdata , const string& fits_filename){
 			// Count the rows
 			counterL1IDrow++;
 
+			// Level 1 ID
+			vecL1ID.push_back(L1ID++);
+
 			// Level 0 in LEVEL 1 ID
-			vecL0ID_L1.push_back(L0ID_L1++);
+			vecL0ID_L1.push_back(itel);
+
+			// Pixel ID added by VF
+			vecPixelID.push_back(p);
 
 			// Pixel x,y position in camera [mm].			
 			vecXTubeMM.push_back(hsdata->camera_set[itel].xpix[p] * 1.e3);
@@ -377,7 +334,7 @@ int FillTelConfig( AllHessData* hsdata , const string& fits_filename){
 
 	}
 
-
+	cout << "Number of L1 rows" << counterL1IDrow << endl;
 
 
         CreateConfig telconfig( fits_filename );  
@@ -565,11 +522,17 @@ int main(int argc, char *argv[])
                     				_tels_pos[_hess_data->run_header.tel_id[i]][2] = _hess_data->run_header.tel_pos[i][2];
                 			}*/
 					break;
+				case IO_TYPE_HESS_CAMSETTINGS:
+					tel_id = iobuf.ItemIdent(); // Telescope ID is in the header
+					itel = find_tel_idx( tel_id );
+					rc = read_hess_camsettings( iobuf.Buffer(), &hsdata->camera_set[itel] );
+
+					break;
 				case IO_TYPE_HESS_MCRUNHEADER:
 					// MC run header info
-					cout << "Activating IO_TYPE_HESS_MCRUNHEADER" << endl;			
+					cout << "Activating IO_TYPE_HESS_MCRUNHEADER" << endl;	
 					rc = read_hess_mcrunheader( iobuf.Buffer(), &hsdata->mc_run_header );
-
+		
 					break;
 				case IO_TYPE_MC_INPUTCFG:
 					// Corsika inputs info
@@ -577,21 +540,45 @@ int main(int argc, char *argv[])
 				case IO_TYPE_HESS_CAMORGAN:
 					// Camera organization info
 					cout << "Activating IO_TYPE_HESS_CAMORGAN" << endl;			
+					tel_id = iobuf.ItemIdent(); // Telescope ID is in the header
+					rc = read_hess_camorgan( iobuf.Buffer(), &hsdata->camera_org[itel] );
+
+					break;
 				case IO_TYPE_HESS_PIXELSET:
 					// Pixel set info. The time slice is here.
 					cout << "Activating IO_TYPE_HESS_PIXELSET" << endl;			
+					tel_id = iobuf.ItemIdent(); // Telescope ID is in the header
+					rc = read_hess_pixelset( iobuf.Buffer(), &hsdata->pixel_set[itel] );
+
+					break;
 				case IO_TYPE_HESS_PIXELDISABLE:
 					// Pixel disable set info.
 					cout << "Activating IO_TYPE_HESS_PIXELDISABLE" << endl;			
+					tel_id = iobuf.ItemIdent(); // Telescope ID is in the header
+					rc = read_hess_pixeldis( iobuf.Buffer(), &hsdata->pixel_disabled[itel] );
+
+					break;
 				case IO_TYPE_HESS_CAMSOFTSET:
 					//Camera software settings.
 					cout << "Activating IO_TYPE_HESS_CAMSOFTSET" << endl;			
+					tel_id = iobuf.ItemIdent(); // Telescope ID is in the header
+					rc = read_hess_camsoftset( iobuf.Buffer(), &hsdata->cam_soft_set[itel] );
+
+					break;
 				case IO_TYPE_HESS_POINTINGCOR:
 					//Pointing correction info
 					cout << "Activating IO_TYPE_HESS_POINTINGCOR" << endl;			
+					tel_id = iobuf.ItemIdent(); // Telescope ID is in the header
+					rc = read_hess_pointingcor( iobuf.Buffer(), &hsdata->point_cor[itel] );
+
+					break;
 				case IO_TYPE_HESS_TRACKSET:
 					//Tracking settings
 					cout << "Activating IO_TYPE_HESS_TRACKSET" << endl;			
+					tel_id = iobuf.ItemIdent(); // Telescope ID is in the header
+					rc = read_hess_trackset( iobuf.Buffer(), &hsdata->tracking_set[itel] );
+
+					break;
 				case IO_TYPE_HESS_EVENT:
 					cout << "Activating IO_TYPE_HESS_EVENT" << endl;			
 					rc = read_hess_event( iobuf.Buffer(), &hsdata->event, -1 );
@@ -627,10 +614,6 @@ int main(int argc, char *argv[])
 
 						int type = -1;
 						rc = read_hess_calib_event( iobuf.Buffer(), &hsdata->event, -1, &type );
-						if( verbose || rc != 0 )
-						{
-						printf( "read_hess_calib_event(), rc = %d, type=%d\n", rc, type );
-						}
 					}
 					break;
 				
@@ -660,10 +643,20 @@ int main(int argc, char *argv[])
 					
 				case IO_TYPE_HESS_TEL_MONI:
 					cout << "Activating IO_TYPE_HESS_TEL_MONI" << endl;			
+					// Telescope ID among others in the header
+					tel_id = ( iobuf.ItemIdent() & 0xff ) |
+							 ( ( iobuf.ItemIdent() & 0x3f000000 ) >> 16 );
+
+					rc = read_hess_tel_monitor( iobuf.Buffer(), &hsdata->tel_moni[itel] );
+
+					break;
 
 				case IO_TYPE_HESS_LASCAL:
 					cout << "Activating IO_TYPE_HESS_LASCAL" << endl;			
-					
+					tel_id = iobuf.ItemIdent(); // Telescope ID is in the header
+					rc = read_hess_laser_calib( iobuf.Buffer(), &hsdata->tel_lascal[itel] );
+
+					break;					
 				case IO_TYPE_HESS_RUNSTAT:
 					cout << "Activating IO_TYPE_HESS_RUNSTAT" << endl;			
 					rc = read_hess_run_stat( iobuf.Buffer(), &hsdata->run_stat );
@@ -677,9 +670,9 @@ int main(int argc, char *argv[])
 				default:
 					if( !ignore )
 					{
-						fprintf( stderr, "Ignoring data block type %ld\n", item_type );
+						cout << "Ignoring data block type "<< item_type << endl;
 					}
-			//}
+
 		}
 		
 		

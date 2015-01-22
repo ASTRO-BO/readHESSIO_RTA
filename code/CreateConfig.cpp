@@ -16,11 +16,12 @@
 #include <algorithm>
 
 #include "CreateConfig.h"
-#include <rtautils/OutputFileFITS.h>
+#include <ctautils/OutputFileFITS.h>
 
 #define CONF_L0HEADER 0
 #define CONF_L1HEADER 1
 
+using namespace std;
 
 CreateConfig::CreateConfig(const string& confInputFileName) {
 	
@@ -28,14 +29,13 @@ CreateConfig::CreateConfig(const string& confInputFileName) {
 		
 		if (confInputFileName != "") {
 
-			/// if exists overwrite
-			//checkExistsOverWrite(confInputFileName);
 			/// create FITS file
-			conf_file.create("!"+confInputFileName);            
+			conf_file.create("!"+confInputFileName);          
+
 		}
         
 	}
-	catch (qlbase::IOException& e) {
+	catch (CTAUtils::IOException& e) {
 		cout << "ERROR: File "<< confInputFileName <<" does not exist. Error code: " << e.getErrorCode() << endl;
 		exit(1);
 	}
@@ -94,7 +94,7 @@ void CreateConfig::writeConfig_L0(int conf_Nrows_L0,
 			vec_conf_fields_L0.push_back("MirrorArea");
 
 			// writing a new binary table on first header should raise an error
-			std::vector<qlbase::field> fields_L0(vec_conf_fields_L0.size());
+			std::vector<CTAUtils::field> fields_L0(vec_conf_fields_L0.size());
 
 			// create the fields structure
 			for(unsigned int i=0; i<fields_L0.size(); i++)
@@ -105,49 +105,49 @@ void CreateConfig::writeConfig_L0(int conf_Nrows_L0,
             
             		/// assign the type for each field
 
-			fields_L0[0].type = qlbase::INT64;
+			fields_L0[0].type = CTAUtils::INT64;
 			fields_L0[0].unit = "/";
-			fields_L0[1].type = qlbase::INT16;
+			fields_L0[1].type = CTAUtils::INT16;
 			fields_L0[1].unit = "/";
-			fields_L0[2].type = qlbase::INT64;
+			fields_L0[2].type = CTAUtils::INT64;
 			fields_L0[2].unit = "/";
-			fields_L0[3].type = qlbase::FLOAT;
+			fields_L0[3].type = CTAUtils::FLOAT;
 			fields_L0[3].unit = "m";
-			fields_L0[4].type = qlbase::FLOAT;
+			fields_L0[4].type = CTAUtils::FLOAT;
 			fields_L0[4].unit = "m";
-			fields_L0[5].type = qlbase::FLOAT;
+			fields_L0[5].type = CTAUtils::FLOAT;
 			fields_L0[5].unit = "m";
-			fields_L0[6].type = qlbase::FLOAT;
+			fields_L0[6].type = CTAUtils::FLOAT;
 			fields_L0[6].unit = "m";
-			fields_L0[7].type = qlbase::FLOAT;
+			fields_L0[7].type = CTAUtils::FLOAT;
 			fields_L0[7].unit = "";
-			fields_L0[8].type = qlbase::FLOAT;
+			fields_L0[8].type = CTAUtils::FLOAT;
 			fields_L0[8].unit = "/";
-			fields_L0[9].type = qlbase::FLOAT;
+			fields_L0[9].type = CTAUtils::FLOAT;
 			fields_L0[9].unit = "/";
-			fields_L0[10].type = qlbase::FLOAT;
+			fields_L0[10].type = CTAUtils::FLOAT;
 			fields_L0[10].unit = "deg";
-			fields_L0[11].type = qlbase::INT16;
+			fields_L0[11].type = CTAUtils::INT16;
 			fields_L0[11].unit = "/";
-			fields_L0[12].type = qlbase::INT16;
+			fields_L0[12].type = CTAUtils::INT16;
 			fields_L0[12].unit = "/";
-			fields_L0[13].type = qlbase::INT16;
+			fields_L0[13].type = CTAUtils::INT16;
 			fields_L0[13].unit = "/";
-			fields_L0[14].type = qlbase::FLOAT;
+			fields_L0[14].type = CTAUtils::FLOAT;
 			fields_L0[14].unit = "ns";
-			fields_L0[15].type = qlbase::INT16;
+			fields_L0[15].type = CTAUtils::INT16;
 			fields_L0[15].unit = "/";
-			fields_L0[16].type = qlbase::FLOAT;
+			fields_L0[16].type = CTAUtils::FLOAT;
 			fields_L0[16].unit = "/";
-			fields_L0[17].type = qlbase::INT16;
+			fields_L0[17].type = CTAUtils::INT16;
 			fields_L0[17].unit = "/";
-			fields_L0[18].type = qlbase::FLOAT;
+			fields_L0[18].type = CTAUtils::FLOAT;
 			fields_L0[18].unit = "/";
-			fields_L0[19].type = qlbase::INT16;
+			fields_L0[19].type = CTAUtils::INT16;
 			fields_L0[19].unit = "/";
-			fields_L0[20].type = qlbase::INT16;
+			fields_L0[20].type = CTAUtils::INT16;
 			fields_L0[20].unit = "/";
-			fields_L0[21].type = qlbase::FLOAT;
+			fields_L0[21].type = CTAUtils::FLOAT;
 			fields_L0[21].unit = "m^2";
 
 			// Create binary table
@@ -211,7 +211,7 @@ void CreateConfig::writeConfig_L1( int conf_Nrows_L1,
 			vec_conf_fields_L1.push_back("TubeOFF");
 
 			// writing a new binary table on first header should raise an error
-			std::vector<qlbase::field> fields_L1(vec_conf_fields_L1.size());
+			std::vector<CTAUtils::field> fields_L1(vec_conf_fields_L1.size());
 
 			// create the fields structure
 			for(unsigned int i=0; i<fields_L1.size(); i++)
@@ -222,27 +222,27 @@ void CreateConfig::writeConfig_L1( int conf_Nrows_L1,
 
             		/// assign the type for each field
 
-			fields_L1[0].type = qlbase::INT64;
+			fields_L1[0].type = CTAUtils::INT64;
 			fields_L1[0].unit = "/";
-			fields_L1[1].type = qlbase::INT64;
+			fields_L1[1].type = CTAUtils::INT64;
 			fields_L1[1].unit = "/";
-			fields_L1[2].type = qlbase::INT16;
+			fields_L1[2].type = CTAUtils::INT16;
 			fields_L1[2].unit = "/";
-			fields_L1[3].type = qlbase::FLOAT;
+			fields_L1[3].type = CTAUtils::FLOAT;
 			fields_L1[3].unit = "mm";
-			fields_L1[4].type = qlbase::FLOAT;
+			fields_L1[4].type = CTAUtils::FLOAT;
 			fields_L1[4].unit = "mm";
-			fields_L1[5].type = qlbase::FLOAT;
+			fields_L1[5].type = CTAUtils::FLOAT;
 			fields_L1[5].unit = "mm";
-			fields_L1[6].type = qlbase::FLOAT;
+			fields_L1[6].type = CTAUtils::FLOAT;
 			fields_L1[6].unit = "deg";
-			fields_L1[7].type = qlbase::FLOAT;
+			fields_L1[7].type = CTAUtils::FLOAT;
 			fields_L1[7].unit = "deg";
-			fields_L1[8].type = qlbase::FLOAT;
+			fields_L1[8].type = CTAUtils::FLOAT;
 			fields_L1[8].unit = "deg";
-			fields_L1[9].type = qlbase::FLOAT;
+			fields_L1[9].type = CTAUtils::FLOAT;
 			fields_L1[9].unit = "m^2";
-			fields_L1[10].type = qlbase::INT16;
+			fields_L1[10].type = CTAUtils::INT16;
 			fields_L1[10].unit = "";
 
 			// Create binary table
@@ -264,7 +264,6 @@ void CreateConfig::writeConfig_L1( int conf_Nrows_L1,
 }
 
 CreateConfig::~CreateConfig() {
-	conf_file.writeKeyword("AUTHOR", "Valentina Fioretti", "INAF/IASF Bologna");
 	conf_file.close();
     
 }
