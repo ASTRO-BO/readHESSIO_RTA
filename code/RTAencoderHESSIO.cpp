@@ -35,13 +35,18 @@
 
 #include <time.h>
 #include <vector>
+
 #include <packet/PacketLibDefinition.h>
 #include <packet/PacketExceptionIO.h>
+#include <packet/OutputPacketStream.h>
+#include <packet/ByteStream.h>
+#include <packet/Output.h>
+#include <packet/OutputFile.h>
 
 #include <io_hess.h>
 #include <EventIO.hh>
 
-#include <CreateConfig.h>
+#include "CreateConfig.h"
 
 using namespace std;
 
@@ -378,6 +383,119 @@ int FillTelConfig( AllHessData* hsdata , const string& fits_filename){
 	return 1;
 }
 
+/*
+int FillPacketFADC(AllHessData* hsdata , const string& packet_filename){
+
+	//Objects that manages a stream of byte
+	OutputPacketStream* ops = 0;
+	try
+	{
+
+		//create output packet stream - configFileName is the name of the xml file
+    		ops = new OutputPacketStream("./conf/rta_fadc1.xml");
+
+    		// Create and open an output device: file
+    		Output* out = (Output*) new OutputFile(ops->isBigEndian());
+    		vector<string> param;
+    		param.push_back(argv[2]+"_FADC.raw");
+    		out->openDevice(param);
+
+   		// connect the output packet stream with the output
+    		ops->setOutput(out)
+
+		//get a packet to encode the data of a camera that manage 40 samples for each pixel
+		Packet* p = ops->getPacketType("triggered_telescope1");
+
+		// number of events		
+		int numberOfEvent = 100;
+
+
+		//get the number of samples managed by the packet
+		word numPixelSamples = p->getPacketSourceDataField()->getFieldValue("Number of samples");
+
+		//set the number of pixel managed by the packet
+		word numberOfCameraPixels = 2048;
+		p->getPacketSourceDataField()->setNumberOfBlocks(numberOfCameraPixels);
+
+		//time of trigger
+		unsigned long timetrigger = 100000;
+
+		for(int i=0; i<nevents; i++) {
+
+			//store some informations on the headers
+		    	p->getPacketDataFieldHeader()->setFieldValue_32ui("Ttime:secs", timetrigger++);
+		    	p->getPacketDataFieldHeader()->setFieldValue_32ui("Ttime:nsecs", rand());
+		    	p->getPacketSourceDataField()->setFieldValue_32ui("eventNumber", i);
+
+		    	//store the information of the pixels
+
+ 		    	//set each single field
+		    	for(word pixel=0; pixel<numberOfCameraPixels; pixel++){
+		        	for(word sample=0; sample<numPixelSamples; sample++) {
+ 		           		//word sampleValue = rand() % 100 + 50;
+ 		           		word sampleValue = sample;
+ 		           		p->getPacketSourceDataField()->getBlock(pixel)->setFieldValue(sample, sampleValue);
+		        	}
+			}
+
+	  		//encode the packet
+ 		   	p->encode();
+
+ 		   	//compress the data
+ 		   	if(compress) p->compressData(LZ4, compress);
+
+ 		   	//write the encoded packet to output
+ 		   	ops->writePacket(p);
+
+ 		   	//get the size of the packet (only for measurement of performances)
+ 		   	dword packetSize = p->size();
+ 		   	totbytes += packetSize;
+
+		}
+
+        ///Number of events
+        //int numberOfEvent = dst_tree->GetEntriesFast();
+        int numberOfEvent = 100;
+        cout << numberOfEvent << endl;
+        /// Looping in the triggered events
+        srand(0);
+	long counts = 0;
+	PacketLib::word SSC_index;
+	vector<int16_t> SSC_array;
+	SSC_array.resize(300);
+		
+	unsigned short ssc = 0;
+        for(int evtindex = 0; evtindex<numberOfEvent; evtindex++) {
+            //cout << "--" << evtindex << endl;
+
+            //for each triggere telescope, generate a telemetry packet
+            for(int telindex = 0; telindex<300; telindex++) {
+				
+				
+
+            }		
+
+        }
+        
+        t = clock() - t;
+        //printf ("It took me %d clicks (%f seconds).\n",t,((float)t)/CLOCKS_PER_SEC);
+        cout << "END " << counts << endl;
+        
+        return 0;
+
+	}
+	catch (PacketException* e)
+	{
+    		cout << "Error on stream constructor: ";
+    		cout << e->geterror() << endl;
+	}
+
+	return 1;
+
+
+
+}
+*/
 
 /// Writing the Packet
 int main(int argc, char *argv[])
@@ -432,6 +550,42 @@ int main(int argc, char *argv[])
 	eventio::EventIO iobuf;  //eventio::EventIO _input;
 	iobuf.OpenInput(argv[1]);
 	hsdata = new AllHessData;
+
+	// ------------> preparing the packetlib output
+	//Objects that manages a stream of byte
+	PacketLib::OutputPacketStream* ops = 0;
+
+	//create output packet stream - configFileName is the name of the xml file
+    	ops = new PacketLib::OutputPacketStream("./conf/rta_fadc1.xml");
+
+    	// Create and open an output device: file
+    	PacketLib::Output* out = (PacketLib::Output*) new PacketLib::OutputFile(ops->isBigEndian());
+    	vector<string> param;
+	char name_fadc_out[100];   // array to hold the packet name.
+
+	strcpy(name_fadc_out,argv[2]);
+	strcat(name_fadc_out,"_FADC.raw"); 
+    	param.push_back(name_fadc_out);
+    	out->openDevice(param);
+
+   	// connect the output packet stream with the output
+    	ops->setOutput(out);
+
+	//get a packet to encode the data of a camera that manage 40 samples for each pixel
+	PacketLib::Packet* p = ops->getPacketType("triggered_telescope1");
+
+        /// Looping in the triggered events
+        srand(0);
+	long counts = 0;
+	unsigned short SSC_index;
+	vector<int16_t> SSC_array;		
+	PacketLib::word ssc = 0;
+
+	//get a packet to encode the data of a camera that manage 40 samples for each pixel
+	PacketLib::Packet* p = ops->getPacketType("triggered_telescope1");
+
+	// number of events		
+	//int numberOfEvent = 100;
 
 
 	// from Gernot/Konrad/Etienne
@@ -583,6 +737,8 @@ int main(int argc, char *argv[])
 					cout << "Activating IO_TYPE_HESS_EVENT" << endl;			
 					rc = read_hess_event( iobuf.Buffer(), &hsdata->event, -1 );
 
+					cout << "EventID: " << events << endl;
+					cout << "Number of triggered telescopes: " << hsdata->event.num_teldata << endl;
 					events++;
 
 					//Count number of telescopes (still) present in data and triggered 
@@ -605,7 +761,42 @@ int main(int argc, char *argv[])
 					}
 					ntrg++;
 
-					
+					// Writing the FADC packet
+					SSC_array.resize(NTel);
+		
+				        //for each triggere telescope, generate a telemetry packet
+            				for(int telindex = 0; telindex<ntel_trg; telindex++) {
+				
+				                //set the header of the tm packet
+                				trtel->header.setAPID(vecTelID[telindex]); 	//the data generator (for now, the telescope)
+
+				                for (int j = 0; j < vecTelID.size(); j++){
+               					    if (TelescopeId == vectorTelID[j]){
+                 				     	SSC_index = j;
+                    					break;
+                  				    }
+          					}
+                
+                trtel->header.setSSC(ssc=	SSC_array[SSC_index]);	//a unique counter of packets
+                cout << "ssc " << ssc << endl;
+
+
+
+						//set the number of samples managed by the packet
+						word numPixelSamples = p->getPacketSourceDataField()->getFieldValue("Number of samples");
+
+						//set the number of pixel managed by the packet
+						word numberOfCameraPixels = 2048;
+						p->getPacketSourceDataField()->setNumberOfBlocks(numberOfCameraPixels);
+	
+						//time of trigger
+						unsigned long timetrigger = 100000;
+				
+
+            				}		
+
+
+			
 					break;
 					
 				case IO_TYPE_HESS_CALIBEVENT:
@@ -695,36 +886,9 @@ int main(int argc, char *argv[])
 
 	// Fill the telconfig parameters
 	FillTelConfig(hsdata, argv[3]);
-     	    
-        ///Number of events
-        //int numberOfEvent = dst_tree->GetEntriesFast();
-        int numberOfEvent = 100;
-        cout << numberOfEvent << endl;
-        /// Looping in the triggered events
-        srand(0);
-	long counts = 0;
-	PacketLib::word SSC_index;
-	vector<int16_t> SSC_array;
-	SSC_array.resize(300);
-		
-	unsigned short ssc = 0;
-        for(int evtindex = 0; evtindex<numberOfEvent; evtindex++) {
-            //cout << "--" << evtindex << endl;
 
-            //for each triggere telescope, generate a telemetry packet
-            for(int telindex = 0; telindex<300; telindex++) {
-				
-				
-
-            }		
-
-        }
-        
-        t = clock() - t;
-        //printf ("It took me %d clicks (%f seconds).\n",t,((float)t)/CLOCKS_PER_SEC);
-        cout << "END " << counts << endl;
-        
-        return 0;
+	// Fill the telconfig parameters
+	//FillPacketFADC(hsdata, argv[2]);
 
     }
     catch(PacketLib::PacketExceptionIO* e)
@@ -735,7 +899,7 @@ int main(int argc, char *argv[])
     {
         cout << e->geterror() << endl;
     }
-
+     	    
 	return 1;
 }
 
