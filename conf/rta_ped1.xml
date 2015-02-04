@@ -1,0 +1,50 @@
+<stream name="rta_ped1" xmlns="http://iasfbo.inaf.it/telemetry" bigendian="false">
+  <header name="CTAHeaderGEN" description="Header CTA" idref="packetlength">
+    <field name="Version number" type="uint3" constvalue="5" />
+    <field name="Type" type="uint1" constvalue="0" />
+    <field name="DHFH" type="uint1" constvalue="1" />
+    <field name="APID" type="uint11" />
+    <field name="SF" type="uint2" constvalue="3" />
+    <field name="Source Sequence Counter" type="uint14" />
+    <field name="Packet Length" type="uint32" id="packetlength" />
+    <field name="CRC flag" type="uint2" constvalue="3" />
+    <field name="Packet Type" type="uint6" id="id1" />
+    <field name="Packet Subtype" type="uint8" id="id2" />
+    <field name="CompressionAlgorithm" type="uint8" id="packetlib:compression_algorithm" />
+    <field name="CompressionLevel" type="uint8" id="packetlib:compression_level" />
+  </header>
+  <packet name="ped_telescope1" description="CTA Calibration Pedestal and Pedvar">
+    <datafieldheader>
+      <field name="LTtime" type="uint64" />
+      <field name="ArrayID" type="uint16" />
+      <field name="runNumber" type="uint16" />
+    </datafieldheader>
+    <sourcedatafield>
+      <field name="pedestalRun" type="uint32" />
+      <field name="TelescopeID" type="uint16" />
+      <field name="Number of summing windows" type="uint16" id="nw" />
+      <field name="Number of pixels" type="uint16" id="ntt" />
+      <rblock name="ped_low_pixel1GEN" maxnumberofblocks="1900" idref="ntt">
+        <field name="PEDESTAL LOW" type="float" />
+        <rblock name="pedvar_low_windowl1GEN" maxnumberofblocks="50" idref="nw">
+        	<field name="PEDVAR LOW" type="float" />
+        </rblock>
+      </rblock>
+      <rblock name="ped_high_pixel1GEN" maxnumberofblocks="1900" idref="ntt">
+        <field name="PEDESTAL HIGH" type="float" />
+        <rblock name="pedvar_high_windowl1GEN" maxnumberofblocks="50" idref="nw">
+        	<field name="PEDVAR HIGH" type="float" />
+        </rblock>
+      </rblock>
+      <rblock name="sumwindow_1GEN" maxnumberofblocks="50" idref="nw">
+        <field name="sumwindow" type="uint16" />
+      </rblock>
+      <rblock name="tzero_1GEN" maxnumberofblocks="1900" idref="ntt">
+        <field name="tzero" type="float" />
+      </rblock>
+    </sourcedatafield>
+    <identifiers>
+      <identifier idref="id1" value="2" />
+    </identifiers>
+  </packet>
+</stream>
