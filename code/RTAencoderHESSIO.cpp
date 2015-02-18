@@ -1,12 +1,13 @@
 /***************************************************************************
                           RTAencoderHESSIO.cpp  -  description
                              -------------------
-    copyright            : (C) 2013 Andrea Bulgarelli
-                               2013 Andrea Zoli
-                               2014 Valentina Fioretti
-    email                : bulgarelli@iasfbo.inaf.it
+    copyright            : (C) 2015 Valentina Fioretti,
+    								Andrea Bulgarelli,
+    								Andrea Zoli
+    								
+    email                : fioretti@iasfbo.inaf.it
+    					   bulgarelli@iasfbo.inaf.it
                            zoli@iasfbo.inaf.it
-                           fioretti@iasfbo.inaf.it
  ***************************************************************************/
 
 /***************************************************************************
@@ -21,6 +22,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+
+#define RBLOCK_PIXEL 0
+#define RBLOCK_SAMPLE 0
+#define RBLOCK_PIXELID 1
 
 #define MATH_PI 3.14159265359
 
@@ -79,50 +84,50 @@ int FillTelConfig( AllHessData* hsdata , const string& fits_filename){
 	cout << " mirrors are Schwarzschild-Couder telescopes" << endl;
 
 	int16_t check_NTel = 0;
-        vector<int64_t> vecL0ID;
-        vector<int16_t> vecTelID;
+    vector<int64_t> vecL0ID;
+    vector<int16_t> vecTelID;
 	int64_t TelType;
-        vector<int64_t> vecTelType;
-        vector<float> vecTelX;
-        vector<float> vecTelY;
-        vector<float> vecTelZ;
+    vector<int64_t> vecTelType;
+    vector<float> vecTelX;
+    vector<float> vecTelY;
+    vector<float> vecTelZ;
 	float FL;
-        vector<float> vecFL;
-        vector<float> vecFOV;
+    vector<float> vecFL;
+    vector<float> vecFOV;
 	float CameraScaleFactor;
-        vector<float> vecCameraScaleFactor;
-        vector<float> vecCameraCentreOffset;
-        vector<float> vecCameraRotation;
+    vector<float> vecCameraScaleFactor;
+    vector<float> vecCameraCentreOffset;
+    vector<float> vecCameraRotation;
 	int16_t NPixel;
-        vector<int16_t> vecNPixel;
-        vector<int16_t> vecNPixel_active;
-        vector<int16_t> vecNSamples;
-        vector<float> vecSample_time_slice;
-        vector<int16_t> vecNGains;
-        vector<float> vecHiLoScale;
-        vector<int16_t> vecHiLoThreshold;
-        vector<float> vecHiLoOffset;
+    vector<int16_t> vecNPixel;
+    vector<int16_t> vecNPixel_active;
+    vector<int16_t> vecNSamples;
+    vector<float> vecSample_time_slice;
+    vector<int16_t> vecNGains;
+    vector<float> vecHiLoScale;
+    vector<int16_t> vecHiLoThreshold;
+    vector<float> vecHiLoOffset;
 	int16_t nDisabled;
-        vector<int16_t> vecNTubesOFF;
+    vector<int16_t> vecNTubesOFF;
 	int16_t NMirrors;
-        vector<int16_t> vecNMirrors;
+    vector<int16_t> vecNMirrors;
 	float MirrorArea;
-        vector<float> vecMirrorArea;
+    vector<float> vecMirrorArea;
         
 	int64_t counterL1IDrow = 0;
 	int64_t L1ID = 0;
-        vector<int64_t> vecL1ID;
-        vector<int64_t> vecL0ID_L1;
-        vector<int16_t> vecPixelID;
-        vector<float> vecXTubeMM;
-        vector<float> vecYTubeMM;
-        vector<float> vecRTubeMM;
+    vector<int64_t> vecL1ID;
+    vector<int64_t> vecL0ID_L1;
+    vector<int16_t> vecPixelID;
+    vector<float> vecXTubeMM;
+    vector<float> vecYTubeMM;
+    vector<float> vecRTubeMM;
 	float XTubeDeg;
-        vector<float> vecXTubeDeg;
+    vector<float> vecXTubeDeg;
 	float YTubeDeg;
-        vector<float> vecYTubeDeg;
+    vector<float> vecYTubeDeg;
 	float RTubeDeg;
-        vector<float> vecRTubeDeg;
+    vector<float> vecRTubeDeg;
 	vector<float> vecAreaTube_m2; 
 	int16_t TubeOFF;
 	vector<int16_t> vecTubeOFF;
@@ -342,43 +347,43 @@ int FillTelConfig( AllHessData* hsdata , const string& fits_filename){
 	cout << "Number of L1 rows" << counterL1IDrow << endl;
 
 
-        CreateConfig telconfig( fits_filename );  
+    CreateConfig telconfig( fits_filename );
 	telconfig.writeConfig_L0(       NTel,
-					vecL0ID,
-        				vecTelID,
-        				vecTelType,
-        				vecTelX,
-        				vecTelY,
-        				vecTelZ,
-        				vecFL,
-        				vecFOV,
-        				vecCameraScaleFactor,
-        				vecCameraCentreOffset,
-        				vecCameraRotation,
-        				vecNPixel,
-        				vecNPixel_active,
-        				vecNSamples,
-        				vecSample_time_slice,
-        				vecNGains,
-        				vecHiLoScale,
-        				vecHiLoThreshold,
-        				vecHiLoOffset,
-        				vecNTubesOFF,
-        				vecNMirrors,
-        				vecMirrorArea);
+                                    vecL0ID,
+                                    vecTelID,
+                                    vecTelType,
+                                    vecTelX,
+                                    vecTelY,
+                                    vecTelZ,
+                                    vecFL,
+                                    vecFOV,
+                                    vecCameraScaleFactor,
+                                    vecCameraCentreOffset,
+                                    vecCameraRotation,
+                                    vecNPixel,
+                                    vecNPixel_active,
+                                    vecNSamples,
+                                    vecSample_time_slice,
+                                    vecNGains,
+                                    vecHiLoScale,
+                                    vecHiLoThreshold,
+                                    vecHiLoOffset,
+                                    vecNTubesOFF,
+                                    vecNMirrors,
+                                    vecMirrorArea);
 	
 	telconfig.writeConfig_L1(       counterL1IDrow,
-					vecL1ID,
-        				vecL0ID_L1,
-        				vecPixelID,
-        				vecXTubeMM,
-        				vecYTubeMM,
-        				vecRTubeMM,
-        				vecXTubeDeg,
-        				vecYTubeDeg,
-        				vecRTubeDeg,
-        				vecAreaTube_m2,
-        				vecTubeOFF);
+                                    vecL1ID,
+                                    vecL0ID_L1,
+                                    vecPixelID,
+                                    vecXTubeMM,
+                                    vecYTubeMM,
+                                    vecRTubeMM,
+                                    vecXTubeDeg,
+                                    vecYTubeDeg,
+                                    vecRTubeDeg,
+                                    vecAreaTube_m2,
+                                    vecTubeOFF);
 
 	return 1;
 }
@@ -459,12 +464,12 @@ int FillPacketFADC(AllHessData* hsdata , const string& packet_filename){
         cout << numberOfEvent << endl;
         /// Looping in the triggered events
         srand(0);
-	long counts = 0;
-	PacketLib::word SSC_index;
-	vector<int16_t> SSC_array;
-	SSC_array.resize(300);
+		long counts = 0;
+		PacketLib::word SSC_index;
+		vector<int16_t> SSC_array;
+		SSC_array.resize(300);
 		
-	unsigned short ssc = 0;
+		unsigned short ssc = 0;
         for(int evtindex = 0; evtindex<numberOfEvent; evtindex++) {
             //cout << "--" << evtindex << endl;
 
@@ -556,37 +561,41 @@ int main(int argc, char *argv[])
 	PacketLib::OutputPacketStream* ops = 0;
 
 	//create output packet stream - configFileName is the name of the xml file
-    	ops = new PacketLib::OutputPacketStream("./conf/rta_fadc1.xml");
+    ops = new PacketLib::OutputPacketStream("./conf/rta_fadc_v3.xml");
 
-    	// Create and open an output device: file
-    	PacketLib::Output* out = (PacketLib::Output*) new PacketLib::OutputFile(ops->isBigEndian());
-    	vector<string> param;
+    // Create and open an output device: file
+    PacketLib::Output* out = (PacketLib::Output*) new PacketLib::OutputFile(ops->isBigEndian());
+    vector<string> param;
 	char name_fadc_out[100];   // array to hold the packet name.
 
 	strcpy(name_fadc_out,argv[2]);
 	strcat(name_fadc_out,"_FADC.raw"); 
-    	param.push_back(name_fadc_out);
-    	out->openDevice(param);
+    param.push_back(name_fadc_out);
+    out->openDevice(param);
 
    	// connect the output packet stream with the output
-    	ops->setOutput(out);
+    ops->setOutput(out);
 
-	//get a packet to encode the data of a camera that manage 40 samples for each pixel
+	//get a packet to encode the data of a camera 
 	PacketLib::Packet* p = ops->getPacketType("triggered_telescope1");
 
-        /// Looping in the triggered events
-        srand(0);
+    /// Looping in the triggered events
+    srand(0);
 	long counts = 0;
 	unsigned short SSC_index;
 	vector<int16_t> SSC_array;		
 	PacketLib::word ssc = 0;
 
-	//get a packet to encode the data of a camera that manage 40 samples for each pixel
-	PacketLib::Packet* p = ops->getPacketType("triggered_telescope1");
+    unsigned long totbytes = 0;
 
-	// number of events		
-	//int numberOfEvent = 100;
-
+	
+	// vector containing the triggered telescopes
+    int16_t RunNumber;
+	vector<int16_t> vecTrigTelID;
+    vector<int16_t> vecTelID;
+	int16_t NTel_Trig;
+    int16_t NSamples_Trig;
+    int16_t NPixels_Trig;
 
 	// from Gernot/Konrad/Etienne
 	/////////////////////////////////////////////
@@ -634,9 +643,13 @@ int main(int argc, char *argv[])
 					}
             
 					NTel = hsdata->run_header.ntel;
+                    RunNumber = hsdata->run_header.run;
 					for( itel = 0; itel < NTel; itel++ )
 					{
-						tel_id = hsdata->run_header.tel_id[itel]; // Telescope ID
+                        // Telescope ID
+                        vecTelID.push_back(hsdata->run_header.tel_id[itel]);
+
+                        tel_id = hsdata->run_header.tel_id[itel]; // Telescope ID
 						// Assign tel_id to array of telescopes configuration structures
 						//cout << "Telescope ID " << tel_id << " is telescope # " << itel << endl;
 						hsdata->camera_set[itel].tel_id = tel_id; // camera set
@@ -763,40 +776,98 @@ int main(int argc, char *argv[])
 
 					// Writing the FADC packet
 					SSC_array.resize(NTel);
-		
-				        //for each triggere telescope, generate a telemetry packet
-            				for(int telindex = 0; telindex<ntel_trg; telindex++) {
+
+					cout << "NTel trig from GM code: " << ntel_trg << endl;
+					NTel_Trig = hsdata->event.central.num_teltrg;					
+					cout << "NTel trig from VF code: " << NTel_Trig << endl;
+					vecTrigTelID.resize(NTel_Trig);
+
+				    //for each triggere telescope, generate a telemetry packet
+                    for(int telindex = 0; telindex<NTel_Trig; telindex++) {
+
+                        vecTrigTelID[telindex] = hsdata->event.central.teltrg_list[telindex];
+
+                        p->getPacketHeader()->setFieldValue("APID", vecTrigTelID[telindex]); //the data generator (for now, the telescope)
+
+                        for (int j = 0; j < vecTelID.size(); j++){
+                            if ( vecTrigTelID[telindex] == vecTelID[j]){
+                                    SSC_index = j;
+                                    break;
+                            }
+                        }
+                        
+                        ssc = SSC_array[SSC_index];
+                        
+
+                        // number of pixels
+                        NPixels_Trig = hsdata->event.teldata[telindex].raw->num_pixels;
+                        
+                        // number of samples
+                        NSamples_Trig = hsdata->event.teldata[telindex].raw->num_samples;
+                        
+                        //p->getPacketHeader()->setFieldValue_16ui("", ); //the metadata
+                        p->getPacketHeader()->setFieldValue("Packet Subtype", NSamples_Trig); //the metadata
+                        p->getPacketHeader()->setFieldValue("Source Sequence Counter", ssc);	//a unique counter of packets
+                        cout << "ssc " << ssc << endl;
+
+                        //store some informations on the Data Field Headers
+                        p->getPacketDataFieldHeader()->setFieldValue_32f("LTtime", hsdata->event.central.teltrg_time[telindex]);
+                        p->getPacketDataFieldHeader()->setFieldValue_16ui("ArrayID", 1);
+                        p->getPacketDataFieldHeader()->setFieldValue_16ui("runNumber", RunNumber);
+                        p->getPacketDataFieldHeader()->setFieldValue_32ui("eventNumber", hsdata->mc_event.event);
+                        p->getPacketDataFieldHeader()->setFieldValue_16ui("TelescopeID", vecTrigTelID[telindex]);
+                        p->getPacketDataFieldHeader()->setFieldValue("numberOfTriggeredTelescopes", NTel_Trig);
+                        
+                        counts++;
+                        p->getPacketDataFieldHeader()->setFieldValue_16ui("telescopeCounter", counts);
+
+                        
+                        //store some informations on the Source Data Field
+                        p->getPacketSourceDataField()->setFieldValue_16ui("Number of pixels", NPixels_Trig);
+                        p->getPacketSourceDataField()->setFieldValue_16ui("Number of samples", NSamples_Trig);
+                        p->getPacketSourceDataField()->setFieldValue_16ui("Number of pixels ID zero-suppressed", NPixels_Trig);
+
+                        //set the number blocks
+                        p->getPacketSourceDataField()->setNumberOfBlocks(NPixels_Trig, RBLOCK_PIXEL);
+                        p->getPacketSourceDataField()->setNumberOfBlocks(NPixels_Trig, RBLOCK_PIXELID);
+                        
+                        //TODO-> Adding the zerosuppressed pixels
+                        
+                        
+                        //store the information of the pixels                        
+                        //set each single field
+                        PacketLib::word jpixel;
+                        PacketLib::word jsample;
+                        for(jpixel=0; jpixel<NPixels_Trig; jpixel++){
+                            p->getPacketSourceDataField()->getBlock(jpixel, RBLOCK_PIXEL)->setNumberOfBlocks(NSamples_Trig, RBLOCK_SAMPLE);
+                            for(jsample=0; jsample<NSamples_Trig; jsample++) {
+                                p->getPacketSourceDataField()->getBlock(jpixel, RBLOCK_PIXEL)->setFieldValue(jsample, hsdata->event.teldata[telindex].raw->adc_sample[HI_GAIN][jpixel][jsample]);
+                            }
+                            PacketLib::word PixelID = jpixel;
+                            p->getPacketSourceDataField()->getBlock(jpixel, RBLOCK_PIXELID)->setFieldValue(jpixel, PixelID);
+                        }
+                        
 				
-				                //set the header of the tm packet
-                				trtel->header.setAPID(vecTelID[telindex]); 	//the data generator (for now, the telescope)
+                        SSC_array[SSC_index] = SSC_array[SSC_index] + 1;
 
-				                for (int j = 0; j < vecTelID.size(); j++){
-               					    if (TelescopeId == vectorTelID[j]){
-                 				     	SSC_index = j;
-                    					break;
-                  				    }
-          					}
-                
-                trtel->header.setSSC(ssc=	SSC_array[SSC_index]);	//a unique counter of packets
-                cout << "ssc " << ssc << endl;
+                    
+                        //encode the packet
+                        p->encode();
+                    
+                        //compress the data
+                        // compression level (0 = do not compress)" << endl;
 
+                        int16_t compress = 0;
+                        if(compress) p->compressData(LZ4, compress);
+                    
+                        //write the encoded packet to output
+                        ops->writePacket(p);
+                    
+                        //get the size of the packet (only for measurement of performances)
+                        PacketLib::dword packetSize = p->size();
+                        totbytes += packetSize;
 
-
-						//set the number of samples managed by the packet
-						word numPixelSamples = p->getPacketSourceDataField()->getFieldValue("Number of samples");
-
-						//set the number of pixel managed by the packet
-						word numberOfCameraPixels = 2048;
-						p->getPacketSourceDataField()->setNumberOfBlocks(numberOfCameraPixels);
-	
-						//time of trigger
-						unsigned long timetrigger = 100000;
-				
-
-            				}		
-
-
-			
+                    }
 					break;
 					
 				case IO_TYPE_HESS_CALIBEVENT:
