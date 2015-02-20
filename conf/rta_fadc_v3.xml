@@ -15,7 +15,7 @@
   </header>
   <packet name="triggered_telescope1_30GEN" description="CTA Triggered Sim Telescope 30 samples">
     <datafieldheader>
-      <field name="LTtime" type="uint64" />
+      <field name="LTtime" type="float" />
       <field name="ArrayID" type="uint16" />
       <field name="runNumber" type="uint16" />
 	  <field name="eventNumber" type="uint32" />
@@ -73,7 +73,7 @@
   </packet>
   <packet name="triggered_telescope1_40GEN" description="CTA Triggered Sim Telescope 40 samples">
     <datafieldheader>
-      <field name="LTtime" type="uint64" />
+      <field name="LTtime" type="float" />
       <field name="ArrayID" type="uint16" />
       <field name="runNumber" type="uint16" />
 	  <field name="eventNumber" type="uint32" />
@@ -141,7 +141,7 @@
   </packet>
   <packet name="triggered_telescope1_50GEN" description="CTA Triggered Sim Telescope 50 samples">
     <datafieldheader>
-      <field name="LTtime" type="uint64" />
+      <field name="LTtime" type="float" />
       <field name="ArrayID" type="uint16" />
       <field name="runNumber" type="uint16" />
 	  <field name="eventNumber" type="uint32" />
@@ -216,5 +216,35 @@
       <identifier idref="id1" value="1" />
       <identifier idref="id2" value="50" />
     </identifiers>
+  </packet>
+  <packet name="triggered_telescope1" description="CTA Triggered Sim Telescope 2">
+      <datafieldheader>
+          <field name="LTtime" type="float" />
+          <field name="ArrayID" type="uint16" />
+          <field name="runNumber" type="uint16" />
+          <field name="eventNumber" type="uint32" />
+          <field name="TelescopeID" type="uint16" />
+          <field name="numberOfTriggeredTelescopes" type="uint8" />
+          <field name="telescopeCounter" type="uint8" />
+      </datafieldheader>
+      <sourcedatafield>
+          <field name="Number of pixels" type="uint16" id="ntt" />
+          <field name="Number of samples" type="uint16" id="ns" />
+          <field name="Number of pixels ID zero-suppressed" type="uint16" id="npixels" />
+          <rblock name="triggered_telescope_pixel1GEN" maxnumberofblocks="1900" idref="ntt">
+              <rblock name="trigger_telescope_sample0GEN" maxnumberofblocks="50" idref="ns">
+                  <field name="FADC" type="uint16" />
+              </rblock>
+          </rblock>
+          <rblock name="triggered_telescope_pixelIDGEN" maxnumberofblocks="1900" idref="npixels">
+              <field name="pixelID" type="uint16" />
+          </rblock>
+      </sourcedatafield>
+      <tail>
+          <field name="CRC" type="uint16" />
+      </tail>
+      <identifiers>
+          <identifier idref="id1" value="1" />
+      </identifiers>
   </packet>
 </stream>
