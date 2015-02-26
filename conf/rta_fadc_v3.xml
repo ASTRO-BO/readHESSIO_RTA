@@ -1,4 +1,4 @@
-<stream name="rta_fadc_all" xmlns="http://iasfbo.inaf.it/telemetry" bigendian="false" >
+<stream name="rta_fadc_v3" xmlns="http://iasfbo.inaf.it/telemetry" bigendian="false" >
   <header name="CTAHeaderGEN" description="Header CTA" idref="packetlength">
     <field name="Version number" type="uint3" constvalue="4" />
     <field name="Type" type="uint1" constvalue="0" />
@@ -24,10 +24,10 @@
 	  <field name="telescopeCounter" type="uint8" />
     </datafieldheader>
     <sourcedatafield>
-	  <field name="Number of pixels" type="uint16" id="ntt" />
+	  <field name="Number of pixels" type="uint16" id="ntt_30" />
 	  <field name="Number of samples" type="uint16" />
-      <field name="Number of pixels ID zero-suppressed" type="uint16" id="npixels" />
-      <rblock name="triggered_telescope_pixel1_30GEN" maxnumberofblocks="1900" idref="ntt">
+      <field name="Number of pixels ID zero-suppressed" type="uint16" id="npixels_30" />
+      <rblock name="triggered_telescope_pixel1_30GEN" maxnumberofblocks="1900" idref="ntt_30">
         <field name="FADC00" type="uint16" />
         <field name="FADC01" type="uint16" />
         <field name="FADC02" type="uint16" />
@@ -59,7 +59,7 @@
         <field name="FADC28" type="uint16" />
         <field name="FADC29" type="uint16" />
       </rblock>
-      <rblock name="triggered_telescope_pixelIDGEN" maxnumberofblocks="1900" idref="npixels">
+      <rblock name="triggered_telescope_pixelIDGEN" maxnumberofblocks="1900" idref="npixels_30">
         <field name="pixelID" type="uint16" />
       </rblock>
     </sourcedatafield>
@@ -82,10 +82,10 @@
 	  <field name="telescopeCounter" type="uint8" />
     </datafieldheader>
     <sourcedatafield>
-      <field name="Number of pixels" type="uint16" id="ntt_2" />
+      <field name="Number of pixels" type="uint16" id="ntt_40" />
       <field name="Number of samples" type="uint16" />
-      <field name="Number of pixels ID zero-suppressed" type="uint16" id="npixels_2" />
-      <rblock name="triggered_telescope_pixel1_40GEN" maxnumberofblocks="1900" idref="ntt_2">
+      <field name="Number of pixels ID zero-suppressed" type="uint16" id="npixels_40" />
+      <rblock name="triggered_telescope_pixel1_40GEN" maxnumberofblocks="1900" idref="ntt_40">
         <field name="FADC00" type="uint16" />
         <field name="FADC01" type="uint16" />
         <field name="FADC02" type="uint16" />
@@ -127,7 +127,7 @@
         <field name="FADC38" type="uint16" />
         <field name="FADC39" type="uint16" />
       </rblock>
-      <rblock name="triggered_telescope_pixelIDGEN" maxnumberofblocks="1900" idref="npixels_2">
+      <rblock name="triggered_telescope_pixelIDGEN" maxnumberofblocks="1900" idref="npixels_40">
         <field name="pixelID" type="uint16" />
       </rblock>
     </sourcedatafield>
@@ -150,10 +150,10 @@
 	  <field name="telescopeCounter" type="uint8" />
     </datafieldheader>
     <sourcedatafield>
-      <field name="Number of pixels" type="uint16" id="ntt_3" />
+      <field name="Number of pixels" type="uint16" id="ntt_50" />
       <field name="Number of samples" type="uint16" />
-      <field name="Number of pixels ID zero-suppressed" type="uint16" id="npixels_3" />
-      <rblock name="triggered_telescope_pixel1_50GEN" maxnumberofblocks="1900" idref="ntt_3">
+      <field name="Number of pixels ID zero-suppressed" type="uint16" id="npixels_50" />
+      <rblock name="triggered_telescope_pixel1_50GEN" maxnumberofblocks="1900" idref="ntt_50">
         <field name="FADC00" type="uint16" />
         <field name="FADC01" type="uint16" />
         <field name="FADC02" type="uint16" />
@@ -205,7 +205,7 @@
         <field name="FADC48" type="uint16" />
         <field name="FADC49" type="uint16" />
       </rblock>
-      <rblock name="triggered_telescope_pixelIDGEN" maxnumberofblocks="1900" idref="npixels_3">
+      <rblock name="triggered_telescope_pixelIDGEN" maxnumberofblocks="1900" idref="npixels_50">
         <field name="pixelID" type="uint16" />
       </rblock>
     </sourcedatafield>
@@ -231,12 +231,12 @@
           <field name="Number of pixels" type="uint16" id="ntt" />
           <field name="Number of samples" type="uint16" id="ns" />
           <field name="Number of pixels ID zero-suppressed" type="uint16" id="npixels" />
-          <rblock name="triggered_telescope_pixel1GEN" maxnumberofblocks="1900" idref="ntt">
+          <rblock name="triggered_telescope_pixel1GEN" maxnumberofblocks="3000" idref="ntt">
               <rblock name="trigger_telescope_sample0GEN" maxnumberofblocks="50" idref="ns">
                   <field name="FADC" type="uint16" />
               </rblock>
           </rblock>
-          <rblock name="triggered_telescope_pixelIDGEN" maxnumberofblocks="1900" idref="npixels">
+          <rblock name="triggered_telescope_pixelIDGEN" maxnumberofblocks="3000" idref="npixels">
               <field name="pixelID" type="uint16" />
           </rblock>
       </sourcedatafield>
